@@ -1,0 +1,49 @@
+#target dummy
+base.armor=100
+bonus.armor=0
+armor=base.armor+bonus.armor
+start.hp=6000
+regen=0.05*start.hp+20
+
+
+#attacker
+AD=400
+attack.delay=.65
+AS=1/attack.delay
+crit=0.75
+critdam=1.5
+arpen=60
+b.arpen=0.35
+uptime=0.99
+giant.slayer=min((start.hp-1800)/500*0.15,0.15)
+bork=0.08+0.0125*40
+p.onhit=0
+m.onhit=0
+max.hp=0
+
+
+prob.kill<-function(attacks,iter){
+  kill=0
+  for (i in 1:iter){
+  curr.hp={}
+  hp=start.hp
+for (i in 1:(attacks)){
+  hp=hp-(1+giant.slayer)*rbinom(1,1,uptime)*(AD*(1+critdam*rbinom(1,1,crit))+bork*hp)/((100+base.armor+bonus.armor*(1-b.arpen)-arpen)/100)+
+    regen*attack.delay
+  curr.hp=c(curr.hp,hp)
+  if(curr.hp[i]<0){
+    kill=kill+1
+    break
+  }
+}
+
+}
+return(kill/iter)
+}
+#plot(curr.hp)
+
+atk={}
+for (i in 1:20){
+  atk=c(atk,prob.kill(i,600))
+}
+plot(atk,xlab="Number of Attacks",ylab="Probability of Killing Target", main="Attacks to Kill Target")
